@@ -57,7 +57,7 @@ def chat():
             clearscr()
         elif prompt_in == 'bot_banner':
             banner = """
-             
+             """
             console.print(Panel(Markdown(banner)), style="bold green")
         elif prompt_in == 'save_chat':
             save_chat(chat_history)
