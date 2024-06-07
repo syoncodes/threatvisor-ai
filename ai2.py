@@ -103,7 +103,7 @@ logging.getLogger().addHandler(console_handler)
 # Load environment variables
 chat_history = []
 
-OPENAI_API_KEY = "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"
+OPENAI_API_KEY = "sk-proj-gQzWO1s8RcfOAU5MjknsT3BlbkFJqjdnxsA4MEFKIZHfleBf"
 console = Console()
 AI_OPTION = ("OPENAI")
 # OpenAI API URL
