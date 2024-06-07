@@ -57,21 +57,12 @@ def chat():
             clearscr()
         elif prompt_in == 'bot_banner':
             banner = """
-             _   _            _    ____        _   
-            | | | | __ _  ___| | _| __ )  ___ | |_ 
-            | |_| |/ _` |/ __||/ /  _ \ / _ \| __| By: Morpheuslord
-            |  _  | (_| | (__|   <| |_) | (_) | |_  AI used: Meta-LLama2
-            |_| |_|\__,_|\___|_|\_\____/ \___/ \__|
-            """
+             
             console.print(Panel(Markdown(banner)), style="bold green")
         elif prompt_in == 'save_chat':
             save_chat(chat_history)
         elif prompt_in == 'contact_dev':
             contact_info = """
-            Email = morpheuslord@protonmail.com
-            Twitter = https://twitter.com/morpheuslord2
-            LinkedIn https://www.linkedin.com/in/chiranjeevi-g-naidu/
-            Github = https://github.com/morpheuslord
             """
             return jsonify({"response": contact_info})
         elif prompt_in == 'help_menu':
@@ -265,17 +256,10 @@ def Print_AI_out(prompt, ai_option, file_path=None) -> Panel:
 def main() -> None:
     clearscr()
     banner = """
-     _   _            _    ____        _   
-    | | | | __ _  ___| | _| __ )  ___ | |_ 
-    | |_| |/ _` |/ __| |/ /  _ \ / _ \| __| By: Morpheuslord
-    |  _  | (_| | (__|   <| |_) | (_) | |_  AI used: Meta-LLama2
-    |_| |_|\__,_|\___|_|\_\____/ \___/ \__|
+    
     """
     contact_dev = """
-    Email = morpheuslord@protonmail.com
-    Twitter = https://twitter.com/morpheuslord2
-    LinkedIn https://www.linkedin.com/in/chiranjeevi-g-naidu/
-    Github = https://github.com/morpheuslord
+    
     """
 
     help_menu = """
