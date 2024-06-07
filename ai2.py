@@ -107,7 +107,7 @@ OPENAI_API_KEY = "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"
 console = Console()
 AI_OPTION = ("OPENAI")
 # OpenAI API URL
-OPENAI_API_URL = "https://api.openai.com/v1/engines/text-davinci-004/completions"
+OPENAI_API_URL = "https://api.openai.com/v1/engines/gpt-4.0/completions"
 
 
 # ... [Include your other functions here, like clearscr, save_chat, vuln_analysis, static_analysis] ...
