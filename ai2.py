@@ -14,8 +14,11 @@ from rich.align import Align
 from rich import box
 from rich.markdown import Markdown
 from typing import Any
+from openai import OpenAI
 app = Flask(__name__)
-
+client = OpenAI(
+    api_key="sk-proj-gQzWO1s8RcfOAU5MjknsT3BlbkFJqjdnxsA4MEFKIZHfleBf"
+)
 chat_histories = {}  # Dictionary for session-specific chat histories
 
 @app.route('/chat', methods=['POST'])
@@ -107,7 +110,7 @@ OPENAI_API_KEY = "sk-proj-gQzWO1s8RcfOAU5MjknsT3BlbkFJqjdnxsA4MEFKIZHfleBf"
 console = Console()
 AI_OPTION = ("OPENAI")
 # OpenAI API URL
-OPENAI_API_URL = "https://api.openai.com/v1/engines/gpt-4.0/completions"
+OPENAI_API_URL = "https://api.openai.com/v1/engines/davinci/completions"
 
 
 # ... [Include your other functions here, like clearscr, save_chat, vuln_analysis, static_analysis] ...
@@ -206,31 +209,25 @@ def static_analysis(language_used, file_path, ai_option) -> str:
 
 def openai_api(chat_context, prompt, file_content=None, file_name=None):
     try:
-        headers = {
-            'Content-Type': 'application/json',
-            'Authorization': f'Bearer {OPENAI_API_KEY}'
-        }
-
-        # Append chat context to the prompt
+        messages = [{"role": "system", "content": "You are a helpful cybersecurity assistant."}]
         if chat_context:
-            prompt = f"{chat_context}\n\n{prompt}"
-
-        # Append file name and content to the prompt if a file is provided
+            messages.append({"role": "user", "content": chat_context})
+        if prompt:
+            messages.append({"role": "user", "content": prompt})
         if file_content and file_name:
-            prompt += f"\n\nFile Name: {file_name}\nFile Content:\n{file_content}"
+            messages.append({"role": "user", "content": f"File Name: {file_name}\nFile Content:\n{file_content}"})
 
-        data = json.dumps({
-            "prompt": prompt,
-            "max_tokens": 1024
-        })
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=messages,
+            max_tokens=1024
+        )
 
-        response = requests.post(OPENAI_API_URL, headers=headers, data=data)
-        response.raise_for_status()
-        response_json = response.json()
-        return response_json.get("choices", [{}])[0].get("text", "")
+        return response.choices[0].message.content
     except Exception as e:
         logging.error(f"Error in openai_api function: {e}")
         return ""
+
 # Modify the Print_AI_out function to accept a file_path
 def Print_AI_out(prompt, ai_option, file_path=None) -> Panel:
     global chat_history
