@@ -15,7 +15,6 @@ organization_collection = db["users"]
 
 # OpenAI API key
 api_key = "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" # Replace with y
-openai.api_key = api_key
 
 app = Flask(__name__)
 
