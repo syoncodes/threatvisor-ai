@@ -2,9 +2,11 @@ import pymongo
 from pymongo import MongoClient
 import random
 import string
-import openai
+from openai import OpenAI
 from flask import Flask, request, redirect
-
+client = OpenAI(
+    api_key="sk-proj-gQzWO1s8RcfOAU5MjknsT3BlbkFJqjdnxsA4MEFKIZHfleBf"
+)
 # MongoDB Atlas connection details
 mongo_uri = 'mongodb://syonb:syonsmart@ac-0w6souu-shard-00-00.jfanqj5.mongodb.net:27017,ac-0w6souu-shard-00-01.jfanqj5.mongodb.net:27017,ac-0w6souu-shard-00-02.jfanqj5.mongodb.net:27017/?replicaSet=atlas-yytbi1-shard-0&ssl=true&authSource=admin'
 client = MongoClient(mongo_uri)
@@ -22,8 +24,12 @@ def generate_mask():
 
 def generate_phishing_email_body(title, description, mask):
     prompt = f"Title: {title}\nDescription: {description}..."
-    response = openai.Completion.create(engine="text-davinci-002", prompt=prompt, max_tokens=150)
-    email_body = response.choices[0].text.strip()
+    response = client.chat.completions.create(
+            model="gpt-4",
+            messages=prompt,
+            max_tokens=160
+        )
+    email_body = response.choices[0].message.content
 
     tracking_url = f"http://20.169.49.29:5000/track_click/{mask}"  # Server's URL
     email_body_with_link = f"{email_body}\n\nClick here: {tracking_url}"
