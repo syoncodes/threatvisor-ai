@@ -218,7 +218,7 @@ def openai_api(chat_context, prompt, file_content=None, file_name=None):
             messages.append({"role": "user", "content": f"File Name: {file_name}\nFile Content:\n{file_content}"})
 
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4o",
             messages=messages,
             max_tokens=1024
         )
