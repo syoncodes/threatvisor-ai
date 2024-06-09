@@ -1,43 +1,76 @@
 import pymongo
-import openai
+from openai import OpenAI
 from datetime import datetime, timedelta
 import time  # Import the time module
 
 # OpenAI API Key
-openai.api_key = "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"
+openai_client = OpenAI(
+    api_key="sk-proj-gQzWO1s8RcfOAU5MjknsT3BlbkFJqjdnxsA4MEFKIZHfleBf"
+)
 
 # MongoDB Atlas connection (replace with your details)
-client = pymongo.MongoClient('mongodb://syonb:syonsmart@ac-0w6souu-shard-00-00.jfanqj5.mongodb.net:27017,ac-0w6souu-shard-00-01.jfanqj5.mongodb.net:27017,ac-0w6souu-shard-00-02.jfanqj5.mongodb.net:27017/?replicaSet=atlas-yytbi1-shard-0&ssl=true&authSource=admin')
-db = client['test']
+mongo_client = pymongo.MongoClient('mongodb://syonb:syonsmart@ac-0w6souu-shard-00-00.jfanqj5.mongodb.net:27017,ac-0w6souu-shard-00-01.jfanqj5.mongodb.net:27017,ac-0w6souu-shard-00-02.jfanqj5.mongodb.net:27017/?replicaSet=atlas-yytbi1-shard-0&ssl=true&authSource=admin')
+db = mongo_client['test']
 collection = db['users']
 
 # Function to format data for the vulnerability report
 def format_report_data(doc):
     formatted_data = {
-        "date": doc.get("date", "N/A"),
-        "data": doc.get("data", {}),
-        "percentage_change": doc.get("percentage_change", {}),
-        "organizationName": doc.get("organizationName", "N/A"),
-        # Add other fields as needed
+        "organizationName": doc.get("organizationName"),
+        "numUsers": len(doc.get("usernames", [])),
+        "endpoints": [],
+        "vulnerability_log": doc.get("vulnerability_log", [])[-4:]  # Latest 4 logs
     }
-    # Exclude the "Paths" key from the "endpoints" data
-    formatted_data["endpoints"] = [{k: v for k, v in endpoint.items() if k != "Paths"} for endpoint in doc.get("endpoints", [])]
+
+    for endpoint in doc.get("endpoints", []):
+        endpoint_data = {
+            "startDate": endpoint.get("startDate"),
+            "items": []
+        }
+        
+        for item in endpoint.get("items", []):
+            item_data = {
+                "description": item.get("description"),
+                "service": item.get("service"),
+                "url": item.get("url"),
+                "scan": item.get("scan"),
+                "results": {}
+            }
+
+            for key, result in item.get("results", {}).items():
+                result_data = result.copy()
+                if item.get("service") == "Domain":
+                    result_data["Paths"] = len(result.get("Paths", []))
+                item_data["results"][key] = result_data
+
+            endpoint_data["items"].append(item_data)
+        
+        formatted_data["endpoints"].append(endpoint_data)
+
     return formatted_data
 
 # Function to create a report using OpenAI
 def create_vulnerability_report(data):
     try:
-        prompt = f"Generate a very detailed vulnerability report using this data, keep in mind that the endpoint phishing tests are run by the company, OSINT tests are also run by the company along with network and domain scans that are run by the company: {data}. In this strict format and don't include N/A fields in the result: Scope: Summary: Findings: Recommendations: Conclusion:"
+        prompt = (
+            f"Generate a detailed vulnerability report using this data, "
+            f"keep in mind that the endpoint phishing tests are run by the company, "
+            f"OSINT tests are also run by the company along with network and domain scans that are run by the company: "
+            f"{data}. In this strict format and don't include N/A fields in the result: "
+            f"Scope: Summary: Findings: Recommendations: Conclusion:"
+        )
         print(f"Sending prompt to OpenAI:\n{prompt}")
         
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+        response = openai_client.ChatCompletion.create(
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You are a security analyst creating a vulnerability report."},
                 {"role": "user", "content": prompt}
-            ]
+            ],
+            max_tokens=1024
         )
-        return response.choices[0].message['content']
+
+        return response.choices[0].message.content
     except Exception as e:
         print(f"Error in generating report: {e}")
         return None
