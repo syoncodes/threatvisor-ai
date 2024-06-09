@@ -1,7 +1,7 @@
 import pymongo
 from openai import OpenAI
 from datetime import datetime, timedelta
-import time
+import time  # Import the time module
 
 # OpenAI API Key
 client = OpenAI(
@@ -61,8 +61,8 @@ def create_vulnerability_report(data):
         )
         print(f"Sending prompt to OpenAI:\n{prompt}")
         
-        response = client.chat.completions.create(
-            model="gpt-4o",
+        response = client.ChatCompletion.create(
+            model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are a security analyst creating a vulnerability report."},
                 {"role": "user", "content": prompt}
@@ -99,7 +99,12 @@ def generate_and_save_reports():
             if should_generate_report:
                 # Format the data for the vulnerability report
                 formatted_data = format_report_data(doc)
-                
+
+                # Check if there are any endpoints
+                if not formatted_data["endpoints"]:
+                    print(f"No endpoints found for {doc['organizationName']}. Skipping report generation.")
+                    continue
+
                 # Create the vulnerability report
                 report = create_vulnerability_report(formatted_data)
 
