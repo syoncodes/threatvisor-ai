@@ -1,17 +1,17 @@
 import pymongo
 from openai import OpenAI
 from datetime import datetime, timedelta
-import time  # Import the time module
+import time
 
 # OpenAI API Key
-openai_client = OpenAI(
+client = OpenAI(
     api_key="sk-proj-gQzWO1s8RcfOAU5MjknsT3BlbkFJqjdnxsA4MEFKIZHfleBf"
 )
 
-# MongoDB Atlas connection (replace with your details)
+# MongoDB Atlas connection
 mongo_client = pymongo.MongoClient('mongodb://syonb:syonsmart@ac-0w6souu-shard-00-00.jfanqj5.mongodb.net:27017,ac-0w6souu-shard-00-01.jfanqj5.mongodb.net:27017,ac-0w6souu-shard-00-02.jfanqj5.mongodb.net:27017/?replicaSet=atlas-yytbi1-shard-0&ssl=true&authSource=admin')
 db = mongo_client['test']
-collection = db['users']
+collection = db['organizations']
 
 # Function to format data for the vulnerability report
 def format_report_data(doc):
@@ -61,7 +61,7 @@ def create_vulnerability_report(data):
         )
         print(f"Sending prompt to OpenAI:\n{prompt}")
         
-        response = openai_client.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are a security analyst creating a vulnerability report."},
@@ -99,12 +99,7 @@ def generate_and_save_reports():
             if should_generate_report:
                 # Format the data for the vulnerability report
                 formatted_data = format_report_data(doc)
-
-                # Check if there are any endpoints
-                if not formatted_data["endpoints"]:
-                    print(f"No endpoints found for {doc['organizationName']}. Skipping report generation.")
-                    continue
-
+                
                 # Create the vulnerability report
                 report = create_vulnerability_report(formatted_data)
 
